@@ -1,67 +1,98 @@
-using AnagramSolver.Contracts.Interfaces;
-using AnagramSolver.WebApp;
 using AnagramSolver.WebApp.Controllers;
 using AnagramSolver.WebApp.Models;
-using FluentAssertions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Moq.Protected;
+using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Json;
+using System.Threading;
+using System.Threading.Tasks;
+using Xunit;
+using FluentAssertions;
 
-namespace AnagramSolver.WebApp.Tests
+namespace AnagramSolver.WebApp.Tests.Controllers
 {
     public class HomeControllerTests
     {
         private readonly Mock<ILogger<HomeController>> _mockLogger;
-        private readonly Mock<IHttpClientFactory> _mockHttpClient;
-        private readonly HomeController _homeController;
+        private readonly Mock<IHttpClientFactory> _mockHttpClientFactory;
+        private readonly Mock<HttpMessageHandler> _mockHttpMessageHandler;
+        private readonly HomeController _sut;
 
         public HomeControllerTests()
         {
             _mockLogger = new Mock<ILogger<HomeController>>();
-            _mockHttpClient = new Mock<IHttpClientFactory>();
-            _homeController = new HomeController(_mockLogger.Object, _mockHttpClient.Object);
-        }
+            _mockHttpClientFactory = new Mock<IHttpClientFactory>();
+            _mockHttpMessageHandler = new Mock<HttpMessageHandler>();
 
-        [Theory]
-        [InlineData("test", "sett")]
-        [InlineData("testing", null)]
-        public async Task Index_VariousWords_ReturnsPossibleAnagrams(string id, string expectedAnagram)
-        {
-            //arrange
-            var expectedResult = expectedAnagram == null
-                ? new List<string>()
-                : new List<string> { expectedAnagram };
+            var client = new HttpClient(_mockHttpMessageHandler.Object);
+            client.BaseAddress = new Uri("http://localhost");
 
-            _mockAnagramSolver.Setup(s => s.GetAnagramsAsync(id, It.IsAny<CancellationToken>())).ReturnsAsync(expectedResult);
+            _mockHttpClientFactory.Setup(x => x.CreateClient("AnagramApi"))
+                .Returns(client);
 
-            //act
-            var result = await _homeController.Index(id, CancellationToken.None);
-
-            //assert
-            var viewResult = Assert.IsType<ViewResult>(result);
-
-            var model = Assert.IsType<AnagramViewModel>(viewResult.Model);
-
-            model.AnagramLines.Should().BeEquivalentTo(expectedResult);
-
+            _sut = new HomeController(_mockLogger.Object, _mockHttpClientFactory.Object);
+            
+            // Setup ControllerContext for Cookies
+            var httpContext = new DefaultHttpContext();
+            var sessionMock = new Mock<ISession>();
+            
+            // Mock session behavior
+            byte[] value = null;
+            sessionMock.Setup(x => x.TryGetValue(It.IsAny<string>(), out value))
+                .Returns(false);
+            
+            httpContext.Session = sessionMock.Object;
+            
+            _sut.ControllerContext = new ControllerContext()
+            {
+                HttpContext = httpContext
+            };
         }
 
         [Fact]
-        public async Task Index_EmptyId_DoesNotCallService()
+        public async Task Index_ShouldReturnViewWithEmptyModel_WhenNoIdProvided()
         {
-            //arrange
+            // Act
+            var result = await _sut.Index(null, CancellationToken.None);
 
-            //act
-            var result = await _homeController.Index("", CancellationToken.None);
+            // Assert
+            var viewResult = result.Should().BeOfType<ViewResult>().Subject;
+            var model = viewResult.Model.Should().BeOfType<AnagramViewModel>().Subject;
+            model.Anagrams.Should().BeEmpty();
+        }
 
-            //assert
-            _mockAnagramSolver.Verify(s => s.GetAnagramsAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        [Fact]
+        public async Task Index_ShouldReturnViewWithAnagrams_WhenIdProvidedAndApiReturnsSuccess()
+        {
+            // Arrange
+            var id = "test";
+            var expectedAnagrams = new List<string> { "sett", "tset" };
 
-            var viewResult = Assert.IsType<ViewResult>(result);
+            _mockHttpMessageHandler.Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.Is<HttpRequestMessage>(r => r.Method == HttpMethod.Get && r.RequestUri.ToString().Contains($"anagrams/{id}")),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = JsonContent.Create(expectedAnagrams)
+                });
 
-            var model = Assert.IsType<AnagramViewModel>(viewResult.Model);
+            // Act
+            var result = await _sut.Index(id, CancellationToken.None);
 
-            model.AnagramLines.Should().BeNullOrEmpty();
+            // Assert
+            var viewResult = result.Should().BeOfType<ViewResult>().Subject;
+            var model = viewResult.Model.Should().BeOfType<AnagramViewModel>().Subject;
+            model.Anagrams.Should().BeEquivalentTo(expectedAnagrams);
         }
     }
 }

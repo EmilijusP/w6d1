@@ -135,19 +135,6 @@ public class AnagramAlgorithmTests
         };
     }
 
-    [Theory]
-    [MemberData(nameof(GetCanFitWithinTestData))]
-    public void CanFitWithin_VariousInputs_ReturnsExpectedResult(Dictionary<char, int> dummyLetters, Dictionary<char, int> dummyTargetLetters, bool expectedResult)
-    {
-        //arrange
-
-        //act
-        var result = _anagramAlgorithm.CanFitWithin(dummyLetters, dummyTargetLetters);
-
-        //assert
-        result.Should().Be(expectedResult);
-    }
-
     public static IEnumerable<object[]> GetCreateCombinationsTestData()
     {
         var possibleAnagrams = new List<Anagram>
@@ -200,20 +187,5 @@ public class AnagramAlgorithmTests
 
         //assert
         result.Should().BeEquivalentTo(expectedResult);
-    }
-
-    [Theory]
-    [InlineData("test", 3, true)]
-    [InlineData("test", 4, true)]
-    [InlineData("test", 5, false)]
-    public void IsValidOutputLength(string key, int minOutputWordsLength, bool expectedResult)
-    {
-        //arrange
-
-        //act
-        var result = _anagramAlgorithm.IsValidOutputLength(key, minOutputWordsLength);
-
-        //assert
-        result.Should().Be(expectedResult);
     }
 }

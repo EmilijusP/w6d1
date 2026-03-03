@@ -1,64 +1,81 @@
-﻿using AnagramSolver.BusinessLogic.Data;
 using AnagramSolver.BusinessLogic.Services;
 using AnagramSolver.Contracts.Interfaces;
 using AnagramSolver.Contracts.Models;
-using Moq;
 using FluentAssertions;
+using Moq;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Xunit;
 
-namespace AnagramSolver.Tests
+namespace AnagramSolver.BusinessLogic.Tests
 {
     public class AnagramSolverTests
     {
-        private readonly Mock<IWordProcessor> _mockWordProcessor;
-        private readonly Mock<IAnagramDictionaryService> _mockDictionaryService;
-        private readonly Mock<IComplexAnagramAlgorithm> _mockAnagramAlgorithm;
-        private readonly Mock<IWordRepository> _mockWordRepository;
-        private readonly Mock<IAppSettings> _mockAppSettings;
-        private readonly AnagramSolverService _systemUnderTest;
+        private readonly Mock<IMemoryCache<IEnumerable<string>>> _mockMemoryCache;
+        private readonly Mock<ISearchLogRepository> _mockSearchLogRepository;
+        private readonly Mock<IInputNormalization> _mockInputNormalization;
+        private readonly Mock<IAnagramFinder> _mockAnagramFinder;
+        private readonly AnagramSolverService _sut;
 
         public AnagramSolverTests()
         {
-            _mockWordProcessor = new Mock<IWordProcessor>();
-            _mockDictionaryService = new Mock<IAnagramDictionaryService>();
-            _mockAnagramAlgorithm = new Mock<IComplexAnagramAlgorithm>();
-            _mockWordRepository = new Mock<IWordRepository>();
-            _mockAppSettings = new Mock<IAppSettings>();
+            _mockMemoryCache = new Mock<IMemoryCache<IEnumerable<string>>>();
+            _mockSearchLogRepository = new Mock<ISearchLogRepository>();
+            _mockInputNormalization = new Mock<IInputNormalization>();
+            _mockAnagramFinder = new Mock<IAnagramFinder>();
 
-            _systemUnderTest = new AnagramSolverService(
-                _mockWordProcessor.Object,
-                _mockDictionaryService.Object,
-                _mockAnagramAlgorithm.Object,
-                _mockWordRepository.Object,
-                _mockAppSettings.Object
-                );
+            _sut = new AnagramSolverService(
+                _mockMemoryCache.Object,
+                _mockSearchLogRepository.Object,
+                _mockInputNormalization.Object,
+                _mockAnagramFinder.Object
+            );
         }
 
-        [Theory]
-        [InlineData("labas", "balas", 1, 4)]
-        public async Task GetAnagramsAsync_ValidSingleWord_ReturnsExpectedAnagram(string inputWord, string expectedAnagram, int anagramCount, int minOutputWordsLength)
+        [Fact]
+        public async Task GetAnagramsAsync_ShouldReturnCachedValue_WhenCacheContainsInput()
         {
-            //arrange
-            var charCount = new Dictionary<char, int> { { 'a', 2 }, { 'b', 1 }, { 'l', 1 }, { 's', 1 } };
-            var anagrams = new List<Anagram> { new Anagram { Words = new List<string> { expectedAnagram }, KeyCharCount = charCount } };
+            // Arrange
+            var input = "test";
+            IEnumerable<string> cachedValue = new List<string> { "sets", "tset" };
+            
+            _mockMemoryCache.Setup(x => x.TryGet(input, out cachedValue))
+                .Returns(true);
 
-            _mockAppSettings.Setup(s => s.AnagramCount).Returns(anagramCount);
-            _mockAppSettings.Setup(s => s.MinOutputWordsLength).Returns(minOutputWordsLength);
-            _mockWordProcessor.Setup(p => p.RemoveWhitespace(inputWord)).Returns(inputWord);
-            _mockWordProcessor.Setup(p => p.CreateCharCount(inputWord)).Returns(charCount);
-            _mockWordRepository.Setup(r => r.ReadAllLinesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(new List<WordModel>());
-            _mockDictionaryService.Setup(d => d.CreateAnagrams(It.IsAny<HashSet<WordModel>>())).Returns(anagrams);
-            _mockAnagramAlgorithm.Setup(a => a.IsValidOutputLength(It.IsAny<string>(), _mockAppSettings.Object.MinOutputWordsLength)).Returns(true);
-            _mockAnagramAlgorithm.Setup(a => a.CanFitWithin(It.IsAny<Dictionary<char, int>>(), It.IsAny<Dictionary<char, int>>())).Returns(true);
-            _mockAnagramAlgorithm.Setup(a => a.FindKeyCombinations(It.IsAny<Dictionary<char, int>>(), _mockAppSettings.Object.AnagramCount, It.IsAny<List<Anagram>>()))
-                .Returns(new List<List<string>> { new List<string> { "key" } });
-            _mockAnagramAlgorithm.Setup(a => a.CreateCombinations(It.IsAny<List<List<string>>>(), It.IsAny<List<Anagram>>()))
-                .Returns(new List<string> { expectedAnagram });
+            // Act
+            var result = await _sut.GetAnagramsAsync(input, CancellationToken.None);
 
-            //act
-            var result = await _systemUnderTest.GetAnagramsAsync(inputWord, CancellationToken.None);
+            // Assert
+            result.Should().BeEquivalentTo(cachedValue);
+            _mockAnagramFinder.Verify(x => x.FindAnagramsAsync(It.IsAny<Dictionary<char, int>>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
 
-            //assert
-            result.Should().Contain(expectedAnagram);
+        [Fact]
+        public async Task GetAnagramsAsync_ShouldCallFinderAndCacheResult_WhenCacheMiss()
+        {
+            // Arrange
+            var input = "test";
+            IEnumerable<string> cachedValue = null;
+            var foundAnagrams = new List<string> { "sets", "tset" };
+            var charCount = new Dictionary<char, int>();
+
+            _mockMemoryCache.Setup(x => x.TryGet(input, out cachedValue))
+                .Returns(false);
+
+            _mockInputNormalization.Setup(x => x.NormalizeInput(input))
+                .Returns(charCount);
+
+            _mockAnagramFinder.Setup(x => x.FindAnagramsAsync(charCount, input, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(foundAnagrams);
+
+            // Act
+            var result = await _sut.GetAnagramsAsync(input, CancellationToken.None);
+
+            // Assert
+            result.Should().BeEquivalentTo(foundAnagrams);
+            _mockMemoryCache.Verify(x => x.Add(input, foundAnagrams), Times.Once);
+            _mockSearchLogRepository.Verify(x => x.AddSearchLogAsync(input, foundAnagrams.Count, It.IsAny<CancellationToken>()), Times.Once);
         }
     }
 }

@@ -81,7 +81,6 @@ C:\Users\emilijus.pocius\source\repos\w1d1\AnagramSolver\AnagramSolver.WebApp\ob
 C:\Users\emilijus.pocius\source\repos\w1d1\AnagramSolver\AnagramSolver.WebApp\obj\Debug\net8.0\staticwebassets.development.json
 C:\Users\emilijus.pocius\source\repos\w1d1\AnagramSolver\AnagramSolver.WebApp\obj\Debug\net8.0\staticwebassets.build.endpoints.json
 C:\Users\emilijus.pocius\source\repos\w1d1\AnagramSolver\AnagramSolver.WebApp\obj\Debug\net8.0\swae.build.ex.cache
-C:\Users\emilijus.pocius\source\repos\w1d1\AnagramSolver\AnagramSolver.WebApp\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
 C:\Users\emilijus.pocius\source\repos\w1d1\AnagramSolver\AnagramSolver.WebApp\obj\Debug\net8.0\AnagramS.9E2C3492.Up2Date
 C:\Users\emilijus.pocius\source\repos\w1d1\AnagramSolver\AnagramSolver.WebApp\obj\Debug\net8.0\AnagramSolver.WebApp.dll
 C:\Users\emilijus.pocius\source\repos\w1d1\AnagramSolver\AnagramSolver.WebApp\obj\Debug\net8.0\refint\AnagramSolver.WebApp.dll

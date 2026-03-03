@@ -3,6 +3,7 @@
     <Project Path="AnagramSolver.WebApp.Tests/AnagramSolver.WebApp.Tests.csproj" Id="4141f0ec-983a-4f71-ac5f-60d26b0f7906" />
     <Project Path="AngaramSolver.BusinessLogic.Tests/AnagramSolver.BusinessLogic.Tests.csproj" />
   </Folder>
+  <Project Path="AgentDemo/AgentDemo.csproj" />
   <Project Path="AnagramSolver.Api/AnagramSolver.Api.csproj" Id="94e7d1f0-41b4-442f-aca5-ba630bd02fbc" />
   <Project Path="AnagramSolver.BusinessLogic/AnagramSolver.BusinessLogic.csproj" />
   <Project Path="AnagramSolver.Cli/AnagramSolver.Cli.csproj" />
