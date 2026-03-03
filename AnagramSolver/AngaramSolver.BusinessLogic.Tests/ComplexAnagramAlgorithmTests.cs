@@ -5,11 +5,11 @@ using FluentAssertions;
 
 namespace AnagramSolver.BusinessLogic.Tests;
 
-public class AnagramAlgorithmTests
+public class ComplexAnagramAlgorithmTests
 {
     private readonly IComplexAnagramAlgorithm _anagramAlgorithm;
 
-    public AnagramAlgorithmTests()
+    public ComplexAnagramAlgorithmTests()
     {
         _anagramAlgorithm = new ComplexAnagramAlgorithm();
     }
