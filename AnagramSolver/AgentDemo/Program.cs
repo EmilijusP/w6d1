@@ -19,7 +19,8 @@ builder.AddOpenAIChatCompletion(
 builder.Plugins.AddFromType<TimePlugin>();
 builder.Plugins.AddFromType<FindAnagramsPlugin>();
 
-builder.Services.AddLogging(configure => configure.AddConsole().SetMinimumLevel(LogLevel.Trace));
+// Logging
+// builder.Services.AddLogging(configure => configure.AddConsole().SetMinimumLevel(LogLevel.Trace));
 
 var kernel = builder.Build();
 
