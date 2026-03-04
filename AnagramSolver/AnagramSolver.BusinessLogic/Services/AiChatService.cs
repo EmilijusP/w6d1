@@ -1,7 +1,9 @@
 ﻿using AnagramSolver.Contracts.Interfaces;
+using AnagramSolver.Contracts.Models;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
+using OpenAI.Responses;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -15,24 +17,18 @@ namespace AnagramSolver.BusinessLogic.Services
     {
         private readonly Kernel _kernel;
         private readonly IChatCompletionService _chatCompletionService;
-        private static readonly ConcurrentDictionary<string, ChatHistory> _sessionHistories = new();
+        private readonly IInMemoryChatHistory _inMemoryChatHistory;
 
-        public AiChatService(Kernel kernel, IChatCompletionService chatCompletionService)
+        public AiChatService(Kernel kernel, IChatCompletionService chatCompletionService, IInMemoryChatHistory inMemoryChatHistory)
         {
             _kernel = kernel;
             _chatCompletionService = chatCompletionService;
+            _inMemoryChatHistory = inMemoryChatHistory;
         }
 
-        public async Task<string> GetResponseAsync(string sessionId, string prompt, CancellationToken ct)
+        public async Task<ChatResponse> GetResponseAsync(string sessionId, string prompt, CancellationToken ct)
         {
-            var chatHistory = _sessionHistories.GetOrAdd(sessionId, _ =>
-            {
-                var history = new ChatHistory();
-                history.AddSystemMessage(
-                    "You are a smart AI assistant, that helps finding anagrams and answering questions."
-                );
-                return history;
-            });
+            var chatHistory = _inMemoryChatHistory.GetOrCreateHistory(sessionId);
 
             chatHistory.AddUserMessage(prompt);
 
@@ -50,7 +46,7 @@ namespace AnagramSolver.BusinessLogic.Services
 
             chatHistory.AddAssistantMessage(responseMessage);
 
-            return responseMessage;
+            return new ChatResponse { Response = responseMessage, SessionId = sessionId} ;
         }
     }
 }

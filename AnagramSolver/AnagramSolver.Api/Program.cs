@@ -43,6 +43,7 @@ builder.Services.AddScoped<Kernel>(sp =>
 builder.Services.AddOpenAIChatCompletion(
     modelId: builder.Configuration["OpenAI:Model"]!,
     apiKey: builder.Configuration["OpenAI:ApiKey"]!);
+builder.Services.AddSingleton<IInMemoryChatHistory, InMemoryChatHistory>();
 builder.Services.AddScoped<IAiChatService, AiChatService>();
 
 builder.Services.AddGraphQLServer().AddQueryType<Query>();

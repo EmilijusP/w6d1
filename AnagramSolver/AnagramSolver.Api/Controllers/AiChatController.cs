@@ -10,10 +10,12 @@ namespace AnagramSolver.Api.Controllers
     public class AiChatController : ControllerBase
     {
         private readonly IAiChatService _aiChatService;
+        private readonly IInMemoryChatHistory _inMemoryChatHistory;
 
-        public AiChatController(IAiChatService aiChatService)
+        public AiChatController(IAiChatService aiChatService, IInMemoryChatHistory inMemoryChatHistory)
         {
             _aiChatService = aiChatService;
+            _inMemoryChatHistory = inMemoryChatHistory;
         }
 
         [HttpPost]
@@ -33,12 +35,34 @@ namespace AnagramSolver.Api.Controllers
 
             var response = new Contracts.Models.ChatResponse
             {
-                Response = aiResponse,
-                SessionId = request.SessionId
+                Response = aiResponse.Response,
+                SessionId = aiResponse.SessionId
             };
 
             return Ok(response);
-         
+        }
+
+        [HttpGet("{sessionId}/history")]
+        public IActionResult GetHistory(string sessionId)
+        {
+            if (string.IsNullOrWhiteSpace(sessionId))
+            {
+                return BadRequest("SessionId cannot be empty");
+            }
+
+            var history = _inMemoryChatHistory.GetHistory(sessionId);
+
+            if (history == null)
+            {
+                return NotFound("Istorija nerasta.");
+            }
+
+            var formattedHistory = history.Select(h => new {
+                Role = h.Role.ToString(),
+                Content = h.Content
+            });
+
+            return Ok(formattedHistory);
         }
     }
 }

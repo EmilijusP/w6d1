@@ -70,7 +70,7 @@
             },
             "Microsoft.SemanticKernel": {
               "target": "Package",
-              "version": "[1.72.0, )"
+              "version": "[1.73.0, )"
             }
           },
           "imports": [
@@ -210,6 +210,12 @@
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
+          "dependencies": {
+            "Microsoft.SemanticKernel": {
+              "target": "Package",
+              "version": "[1.73.0, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",
