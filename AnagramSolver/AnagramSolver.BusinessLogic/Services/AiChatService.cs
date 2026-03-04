@@ -23,7 +23,7 @@ namespace AnagramSolver.BusinessLogic.Services
             _chatCompletionService = chatCompletionService;
         }
 
-        public async Task<string> GetResponseAsync(string sessionId, string prompt)
+        public async Task<string> GetResponseAsync(string sessionId, string prompt, CancellationToken ct)
         {
             var chatHistory = _sessionHistories.GetOrAdd(sessionId, _ =>
             {

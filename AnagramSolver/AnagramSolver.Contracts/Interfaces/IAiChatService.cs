@@ -8,6 +8,6 @@ namespace AnagramSolver.Contracts.Interfaces
 {
     public interface IAiChatService
     {
-        Task<string> GetResponseAsync(string sessionId, string prompt);
+        Task<string> GetResponseAsync(string sessionId, string prompt, CancellationToken ct);
     }
 }
