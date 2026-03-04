@@ -10,6 +10,6 @@ namespace AnagramSolver.Contracts.Models
     {
         public string Response { get; set; } = string.Empty;
 
-        public string sessionId { get; set; } = string.Empty;
+        public string SessionId { get; set; } = string.Empty;
     }
 }
