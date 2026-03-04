@@ -1,1 +1,14 @@
-<app-search-container></app-search-container>
+<div class="shell">
+  <header>
+    <h1>Anagram Solver</h1>
+    <nav>
+      <a routerLink="/anagrams" routerLinkActive="active">Anagrams</a>
+      <a routerLink="/dictionary" routerLinkActive="active">Dictionary</a>
+      <a routerLink="/dictionary/new" routerLinkActive="active">Add Word</a>
+    </nav>
+  </header>
+
+  <main>
+    <router-outlet></router-outlet>
+  </main>
+</div>

@@ -1,0 +1,61 @@
+<section>
+  <h2>Dictionary</h2>
+
+  <div class="download-row">
+    <label for="fileName">Download file</label>
+    <input id="fileName" type="text" [(ngModel)]="fileName" name="fileName" />
+    <button type="button" (click)="download()" [disabled]="isDownloading">
+      {{ isDownloading ? 'Downloading...' : 'Download' }}
+    </button>
+  </div>
+
+  @if (isLoading) {
+    <p>Loading dictionary...</p>
+  }
+
+  @if (errorMessage) {
+    <p>{{ errorMessage }}</p>
+  }
+
+  @if (!isLoading && !errorMessage) {
+    @if (items.length === 0) {
+      <p>Dictionary page is empty.</p>
+    }
+
+    @if (items.length > 0) {
+      <table>
+        <thead>
+          <tr>
+            <th>Id</th>
+            <th>Word</th>
+            <th>Lemma</th>
+            <th>Form</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of items; track item.id) {
+            <tr>
+              <td>{{ item.id }}</td>
+              <td>{{ item.word }}</td>
+              <td>{{ item.lemma }}</td>
+              <td>{{ item.form }}</td>
+              <td>
+                <button type="button" (click)="goToAnagrams(item.word)">Find anagrams</button>
+                <button type="button" (click)="deleteWord(item.id)">Delete</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+
+    <div class="pagination-row">
+      <button type="button" (click)="loadPage(1)" [disabled]="!hasPreviousPage">First</button>
+      <button type="button" (click)="loadPage(currentPage - 1)" [disabled]="!hasPreviousPage">Prev</button>
+      <span>Page {{ currentPage }} / {{ totalPages }}</span>
+      <button type="button" (click)="loadPage(currentPage + 1)" [disabled]="!hasNextPage">Next</button>
+      <button type="button" (click)="loadPage(totalPages)" [disabled]="!hasNextPage">Last</button>
+    </div>
+  }
+</section>

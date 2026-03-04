@@ -1,0 +1,41 @@
+<section>
+  <h2>Anagram Search</h2>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <label for="word">Word</label>
+    <input id="word" type="text" formControlName="word" />
+    <button type="submit" [disabled]="isLoading">Search</button>
+  </form>
+
+  @if (form.controls.word.touched && form.controls.word.hasError('required')) {
+    <p>Word is required.</p>
+  }
+
+  @if (form.controls.word.touched && form.controls.word.hasError('minlength')) {
+    <p>Word must be at least {{ minLength }} characters.</p>
+  }
+
+  @if (isLoading) {
+    <p>Loading anagrams...</p>
+  }
+
+  @if (errorMessage) {
+    <p>{{ errorMessage }}</p>
+  }
+
+  @if (!isLoading && !errorMessage && searchedWord) {
+    <h3>Results for "{{ searchedWord }}"</h3>
+
+    @if (anagrams.length === 0) {
+      <p>No anagrams found.</p>
+    }
+
+    @if (anagrams.length > 0) {
+      <ul>
+        @for (item of anagrams; track item) {
+          <li>{{ item }}</li>
+        }
+      </ul>
+    }
+  }
+</section>

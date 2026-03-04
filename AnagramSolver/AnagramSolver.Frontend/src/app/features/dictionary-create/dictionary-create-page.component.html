@@ -1,0 +1,30 @@
+<section>
+  <h2>Add Dictionary Word</h2>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <label for="word">Word *</label>
+    <input id="word" type="text" formControlName="word" />
+
+    <label for="lemma">Lemma</label>
+    <input id="lemma" type="text" formControlName="lemma" />
+
+    <label for="form">Form</label>
+    <input id="form" type="text" formControlName="form" />
+
+    <button type="submit" [disabled]="isSubmitting">
+      {{ isSubmitting ? 'Saving...' : 'Save' }}
+    </button>
+  </form>
+
+  @if (form.controls.word.touched && form.controls.word.hasError('required')) {
+    <p>Word is required.</p>
+  }
+
+  @if (successMessage) {
+    <p>{{ successMessage }}</p>
+  }
+
+  @if (errorMessage) {
+    <p>{{ errorMessage }}</p>
+  }
+</section>
