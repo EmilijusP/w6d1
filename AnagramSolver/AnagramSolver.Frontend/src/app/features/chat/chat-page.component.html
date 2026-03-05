@@ -1,0 +1,33 @@
+<section>
+  <h2>AI Chat</h2>
+
+  <p>Session: {{ sessionId }}</p>
+
+  <div class="messages">
+    @if (isLoadingHistory) {
+      <p>Loading chat history...</p>
+    }
+
+    @if (!isLoadingHistory && messages.length === 0) {
+      <p>No messages yet.</p>
+    }
+
+    @for (item of messages; track $index) {
+      <p><strong>{{ item.role === 'user' ? 'You' : 'Assistant' }}:</strong> {{ item.text }}</p>
+    }
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="send()">
+    <label for="message">Message</label>
+    <input id="message" type="text" formControlName="message" />
+    <button type="submit" [disabled]="isSending">{{ isSending ? 'Sending...' : 'Send' }}</button>
+  </form>
+
+  @if (form.controls.message.touched && form.controls.message.hasError('required')) {
+    <p>Message is required.</p>
+  }
+
+  @if (errorMessage) {
+    <p>{{ errorMessage }}</p>
+  }
+</section>

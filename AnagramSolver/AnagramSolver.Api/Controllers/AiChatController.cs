@@ -1,7 +1,8 @@
 ﻿using AnagramSolver.Contracts.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.AI;
 using AnagramSolver.Contracts.Models;
+using Microsoft.Extensions.AI;
+using Microsoft.SemanticKernel.ChatCompletion;
 
 namespace AnagramSolver.Api.Controllers
 {
@@ -54,13 +55,15 @@ namespace AnagramSolver.Api.Controllers
 
             if (history == null)
             {
-                return NotFound("Istorija nerasta.");
+                return NotFound("History not found.");
             }
 
-            var formattedHistory = history.Select(h => new {
-                Role = h.Role.ToString(),
-                Content = h.Content
-            });
+            var formattedHistory = history.Where(h => h.Role.Equals(AuthorRole.Assistant)  || h.Role.Equals(AuthorRole.User))
+              .Select(h => new
+              {
+                  Role = h.Role.ToString(),
+                  h.Content
+              });
 
             return Ok(formattedHistory);
         }

@@ -19,6 +19,10 @@ export const routes: Routes = [
     loadComponent: () => import('./features/dictionary-create/dictionary-create-page.component').then((m) => m.DictionaryCreatePageComponent)
   },
   {
+    path: 'chat',
+    loadComponent: () => import('./features/chat/chat-page.component').then((m) => m.ChatPageComponent)
+  },
+  {
     path: '**',
     loadComponent: () => import('./features/not-found/not-found-page.component').then((m) => m.NotFoundPageComponent)
   }
