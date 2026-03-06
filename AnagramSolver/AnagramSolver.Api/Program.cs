@@ -33,6 +33,11 @@ builder.Services.AddScoped<IAnagramSolver, AnagramSolverService>();
 builder.Services.AddScoped<IInputNormalization, InputNormalizationService>();
 builder.Services.AddScoped<IAnagramFinder, AnagramFinder>();
 
+builder.Services.Configure<FrequencyAnalysisOptions>(
+    builder.Configuration.GetSection(FrequencyAnalysisOptions.SectionName));
+builder.Services.AddSingleton<IStopWordsProvider, StopWordsProvider>();
+builder.Services.AddScoped<IFrequencyAnalysisService, FrequencyAnalysisService>();
+
 builder.Services.AddScoped<Kernel>(sp =>
 {
     var plugins = new KernelPluginCollection();

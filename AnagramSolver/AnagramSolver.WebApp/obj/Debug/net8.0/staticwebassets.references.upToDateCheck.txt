@@ -119,3 +119,4 @@ C:\Users\emilijus.pocius\source\repos\w1d1\AnagramSolver\AnagramSolver.Api\obj\D
 C:\Users\emilijus.pocius\source\repos\w1d1\AnagramSolver\AnagramSolver.Api\obj\Debug\net8.0\staticwebassets.build.json
 C:\Users\emilijus.pocius\source\repos\w1d1\AnagramSolver\AnagramSolver.Api\obj\Debug\net8.0\staticwebassets.build.json
 C:\Users\emilijus.pocius\source\repos\w1d1\AnagramSolver\AnagramSolver.Api\obj\Debug\net8.0\staticwebassets.build.json
+C:\Users\emilijus.pocius\source\repos\w1d1\AnagramSolver\AnagramSolver.Api\obj\Debug\net8.0\staticwebassets.build.json
